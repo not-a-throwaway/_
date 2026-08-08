@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <title>all games — mateo</title>
+
+    <script>
+        (function(){
+            var saved = localStorage.getItem('theme');
+            var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        @font-face {
+            font-family: "Pretendard Std";
+            font-weight: 400;
+            font-display: swap;
+            src: url(/static/fonts/pretendard/woff2/PretendardStd-Regular.woff2) format("woff2");
+        }
+        @font-face {
+            font-family: "Pretendard Std";
+            font-weight: 500;
+            font-display: swap;
+            src: url(/static/fonts/pretendard/woff2/PretendardStd-Medium.woff2) format("woff2");
+        }
+        @font-face {
+            font-family: "Pretendard Std";
+            font-weight: 700;
+            font-display: swap;
+            src: url(/static/fonts/pretendard/woff2/PretendardStd-Bold.woff2) format("woff2");
+        }
+        @font-face {
+            font-family: "Pretendard Std";
+            font-weight: 800;
+            font-display: swap;
+            src: url(/static/fonts/pretendard/woff2/PretendardStd-Black.woff2) format("woff2");
+        }
+
+        html[data-theme="light"]{
+            --bg: #e8e6e0;
+            --bg-alt: #dcd9d1;
+            --ink: #26241f;
+            --ink-soft: #5c584d;
+            --ink-faint: #8a8577;
+            --line: #c6c1b6;
+            --accent: #62744a;
+            --accent-soft: #dde3d0;
+            --unlock: #a15c3e;
+            --unlock-soft: #f0ddd0;
+        }
+        html[data-theme="dark"]{
+            --bg: #1b1a17;
+            --bg-alt: #242220;
+            --ink: #e7e3d9;
+            --ink-soft: #a49d8c;
+            --ink-faint: #6f6a5c;
+            --line: #38352e;
+            --accent: #93a86e;
+            --accent-soft: #2a3021;
+            --unlock: #cb8c68;
+            --unlock-soft: #33251c;
+        }
+        :root{
+            --radius: 6px;
+            --space-1: 8px;
+            --space-2: 16px;
+            --space-3: 24px;
+            --space-4: 40px;
+            --space-5: 56px;
+        }
+
+        *{box-sizing:border-box}
+        html{background:var(--bg)}
+        ::selection{background:var(--accent-soft);color:var(--accent)}
+        :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+        body{
+            margin:0;
+            min-height:100vh;
+            display:flex;
+            flex-direction:column;
+            background:var(--bg);
+            color:var(--ink);
+            font-family:"Pretendard Std", apple-system, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height:1.65;
+            -webkit-font-smoothing:antialiased;
+        }
+        .wrap{max-width:600px;margin:0 auto;padding:clamp(48px, 9vw, 80px) 20px 0;flex:1;width:100%}
+
+        .fade{opacity:0;transform:translateY(6px);animation:in .55s cubic-bezier(.2,.7,.2,1) forwards}
+        @keyframes in{to{opacity:1;transform:translateY(0)}}
+        .fade:nth-child(1){animation-delay:.02s}
+        .fade:nth-child(2){animation-delay:.09s}
+        .fade:nth-child(3){animation-delay:.16s}
+        @media (prefers-reduced-motion: reduce){
+            .fade{opacity:1;transform:none;animation:none}
+        }
+
+        .back{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            font-family:"IBM Plex Mono", monospace;
+            font-size:12.5px;
+            color:var(--ink-faint);
+            text-decoration:none;
+            margin:0 0 var(--space-3);
+        }
+        .back:hover, .back:focus-visible{color:var(--accent)}
+        .back .arrow{transition:transform .15s ease}
+        .back:hover .arrow, .back:focus-visible .arrow{transform:translateX(-3px)}
+
+        h1{
+            font-size:clamp(32px, 7vw, 44px);
+            font-weight:800;
+            letter-spacing:-0.02em;
+            margin:0 0 var(--space-1);
+            line-height:1.15;
+        }
+
+        .tagline{
+            font-family:"Libre Baskerville", serif;
+            font-style:italic;
+            color:var(--ink-soft);
+            font-size:16px;
+            margin:0 0 var(--space-5);
+        }
+
+        .games{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+        .game{
+            display:flex;
+            align-items:center;
+            gap:14px;
+            border:1px solid var(--line);
+            border-radius:var(--radius);
+            padding:14px 16px;
+            text-decoration:none;
+            color:var(--ink);
+            background:var(--bg-alt);
+            transition:border-color .15s ease, background .15s ease;
+        }
+        a.game:hover, a.game:focus-visible{
+            border-color:var(--accent);
+            background:var(--accent-soft);
+        }
+        .game-main{flex:1;min-width:0}
+        .game-title{font-weight:600;font-size:15.5px}
+        .game-desc{font-size:13px;color:var(--ink-soft);margin-top:2px}
+        .tag{
+            font-family:"IBM Plex Mono", monospace;
+            font-size:10.5px;
+            padding:3px 7px;
+            border-radius:4px;
+            white-space:nowrap;
+        }
+        .tag-unlock{background:var(--unlock-soft);color:var(--unlock)}
+        .arrow{
+            color:var(--ink-faint);
+            font-family:"IBM Plex Mono", monospace;
+            transition:transform .15s ease, color .15s ease;
+        }
+        a.game:hover .arrow, a.game:focus-visible .arrow{color:var(--accent);transform:translateX(3px)}
+
+        footer{
+            margin-top:var(--space-5);
+            border-top:1px solid var(--line);
+        }
+        footer p{
+            max-width:600px;
+            margin:0 auto;
+            padding:var(--space-2) 20px;
+            font-family:"IBM Plex Mono", monospace;
+            font-size:11px;
+            letter-spacing:.01em;
+            color:var(--ink-faint);
+        }
+
+        .corner-note{
+            position:fixed;
+            top:0;
+            right:0;
+            margin:0;
+            padding:10px 14px;
+            font-family:"IBM Plex Mono", monospace;
+            font-size:11.5px;
+            color:var(--ink-faint);
+        }
+
+        .theme-toggle{
+            position:fixed;
+            top:0;
+            left:0;
+            margin:0;
+            padding:8px 12px;
+            font-family:"IBM Plex Mono", monospace;
+            font-size:11.5px;
+            color:var(--ink-faint);
+            background:none;
+            border:none;
+            cursor:pointer;
+        }
+        .theme-toggle:hover{color:var(--accent)}
+    </style>
+</head>
+<body>
+
+<button class="theme-toggle" id="theme-toggle" type="button" aria-label="toggle color theme">☾/☀</button>
+
+<div class="wrap">
+
+    <a class="back fade" href="/"><span class="arrow">←</span> home</a>
+
+    <h1 class="fade">all games</h1>
+    <p class="tagline fade">every browser game i've actually shipped, no featured cut</p>
+
+    <ul class="games fade">
+        <li>
+            <a class="game" href="/upgt">
+                <div class="game-main">
+                    <div class="game-title">upgrade tree of everything</div>
+                    <div class="game-desc">click stuff, unlock more stuff to click (ignore bad progression)</div>
+                </div>
+                <span class="tag tag-unlock">incremental</span>
+                <span class="arrow">→</span>
+            </a>
+        </li>
+    </ul>
+
+</div>
+
+<footer>
+    <p>made with questionable amounts of javascript &copy; 2026 mateo (this footer is here cuz it looks cool)</p>
+</footer>
+
+<p class="corner-note">rocco was here :3</p>
+
+<script src="/static/neko/neko.js?meow"></script>
+<script>
+(function(){
+    var root = document.documentElement;
+    var btn = document.getElementById('theme-toggle');
+    function render(){
+        var isDark = root.getAttribute('data-theme') === 'dark';
+        btn.textContent = isDark ? '☀ light mode' : '☾ dark mode';
+    }
+    render();
+    btn.addEventListener('click', function(){
+        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        render();
+    });
+})();
+</script>
+</body>
+</html>
