@@ -109,7 +109,8 @@
         .fade:nth-child(1){animation-delay:.02s}
         .fade:nth-child(2){animation-delay:.09s}
         .fade:nth-child(3){animation-delay:.16s}
-        .fade:nth-child(4){animation-delay:.23s}
+        .fade:nth-child(4){animation-delay:.20s}
+        .fade:nth-child(5){animation-delay:.27s}
         @media (prefers-reduced-motion: reduce){
             .fade{opacity:1;transform:none;animation:none}
         }
@@ -157,7 +158,19 @@
             font-style:italic;
             color:var(--ink-soft);
             font-size:17px;
+            margin:0 0 var(--space-3);
+        }
+
+        .local-time{
+            font-family:"IBM Plex Mono", monospace;
+            font-size:12.5px;
+            color:var(--ink-faint);
             margin:0 0 var(--space-4);
+        }
+        .local-time-value{
+            color:var(--accent);
+            font-weight:600;
+            font-style:italic;
         }
 
         .about{
@@ -321,16 +334,17 @@
 
 <button class="theme-toggle" id="theme-toggle" type="button" aria-label="toggle color theme">☾/☀</button>
 
-<div class="wrap">
+<div class="wrap" id="header">
 
     <p class="kicker fade"><span class="dot"></span>currently making incrementals</p>
     <h1 class="fade">hiya, i'm <span class="ari">mateo!</span></h1>
     <p class="tagline fade">this is my website where i make web games ^_^ (mostly incrementals)</p>
 
+    <p class="local-time fade">it's <span class="local-time-value" id="local-time">--:--</span> for me now</p>
+
     <p class="about fade">
-        <strong>student</strong> who spends too much free time on web dev and game design.
-        i like building little browser toys, from full games down to dumb scripts that
-        do things faster than i ever could by hand.
+        <strong>about me</strong><br>
+        some words should go here lorem ipsum, egg egg egg, turkey egg horse.
     </p>
 
     <section class="fade">
@@ -350,7 +364,7 @@
                 <div class="game is-empty">
                     <div class="game-main">
                         <div class="game-title">wip slot</div>
-                        <div class="game-desc">nothing here yet, but there's room for it</div>
+                        <div class="game-desc">this will be done soon maybe idk</div>
                     </div>
                     <span class="tag tag-wip">wip</span>
                 </div>
@@ -359,7 +373,7 @@
                 <div class="game is-empty">
                     <div class="game-main">
                         <div class="game-title">wip slot</div>
-                        <div class="game-desc">nothing here yet, but there's room for it</div>
+                        <div class="game-desc">this will be done soon maybe idk</div>
                     </div>
                     <span class="tag tag-wip">wip</span>
                 </div>
@@ -407,6 +421,22 @@
         localStorage.setItem('theme', next);
         render();
     });
+})();
+</script>
+<script>
+(function(){
+    var el = document.getElementById('local-time');
+    function update(){
+        var now = new Date().toLocaleTimeString('en-US', {
+            timeZone: 'Asia/Manila',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+        el.textContent = now;
+    }
+    update();
+    setInterval(update, 15000);
 })();
 </script>
 </body>
