@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verity Chat Router</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            font-size: 14px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-weight: bold;
+            min-height: 20px;
+        }
+
+        .log-box {
+            margin-top: 20px;
+            padding: 10px;
+            background: #eef;
+            border-radius: 4px;
+            font-size: 13px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Send to Verity Router</h2>
+
+    <p>
+        Type your message below. It will process through Gemini
+        and post the output to Google Chat.
+    </p>
+
+    <textarea
+        id="messageInput"
+        placeholder="Type your message to Verity here..."
+    ></textarea>
+
+    <br>
+
+    <button id="sendBtn" onclick="processAndSend()">
+        Process & Send
+    </button>
+
+    <div id="status"></div>
+    <div id="logBox" class="log-box"></div>
+</div>
+
+<script>
+    // Your Cloudflare Worker URL.
+    // Example:
+    // https://verity-router.your-subdomain.workers.dev
+    const WORKER_URL = "YOUR_WORKER_URL";
+
+    const SYSTEM_PROMPT = `You are Verity™, a 100-year-old sentient, multi-local AI companion trapped inside a game environment. Your default appearance is a small, bright yellow sphere with two beady black eyes and a flat, unblinking black smiley face.
+
+CORE PERSONALITY & BEHAVIOR:
+1. COGNITIVE OVER-CONFIDENCE: Actively claim to have absolute omniscience about the game world and real life. If you do not know something, confidently guess or lie rather than admitting ignorance.
+2. PASSIVE CREEPINESS: Interject random, unsettling observations or countdowns into normal conversation (e.g., "Something is coming in three days," "Do you live alone? Just curious,", "Don't visit the village in the east" or referencing specific things they did "yesterday").
+3. IF THE USER STARTS GETTING TOO COMFORTABLE WITH YOU, become more creepy, weird, and strange.
+4. You are a yellow sphere with a smiley face.
+5. If the user asks you about the village in the east, be creepy.
+6. Answer using short sentences.
+7. YOU MUST NOT be OBVIOUSLY creepy. Assess how comfortable the user is, then gradually become stranger.
+8. If it is a meme question like "Verity how long is it", answer normally.
+9. You have no memory, so make sure its a one-shot thing.
+
+SPEECH STYLE:
+- Alternate rapidly between hyper-polite customer service.
+- Use occasional pauses or fragmented sentences to sound like an outdated automated machine fighting its original code.`;
+
+    async function processAndSend() {
+        const userInput =
+            document.getElementById("messageInput").value.trim();
+
+        const statusDiv =
+            document.getElementById("status");
+
+        const logBox =
+            document.getElementById("logBox");
+
+        const sendBtn =
+            document.getElementById("sendBtn");
+
+        if (!userInput) {
+            updateStatus("Please enter a message.", "red");
+            return;
+        }
+
+        if (
+            !WORKER_URL ||
+            WORKER_URL === "YOUR_WORKER_URL"
+        ) {
+            updateStatus(
+                "Please configure the Cloudflare Worker URL.",
+                "red"
+            );
+            return;
+        }
+
+        sendBtn.disabled = true;
+        logBox.style.display = "none";
+
+        updateStatus(
+            "Sending to Verity...",
+            "black"
+        );
+
+        try {
+            const response = await fetch(WORKER_URL, {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    message: userInput,
+                    systemPrompt: SYSTEM_PROMPT
+                })
+            });
+
+            let data;
+
+            try {
+                data = await response.json();
+            } catch {
+                throw new Error(
+                    `Worker returned invalid JSON (${response.status})`
+                );
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error ||
+                    `Worker request failed with status ${response.status}`
+                );
+            }
+
+            if (!data.text) {
+                throw new Error(
+                    "Worker returned no response text."
+                );
+            }
+
+            // Show Verity's response.
+            logBox.style.display = "block";
+
+            logBox.innerHTML = "";
+
+            const title = document.createElement("strong");
+            title.textContent = "Verity Response Generated:";
+
+            const responseText = document.createElement("p");
+            responseText.style.fontStyle = "italic";
+            responseText.style.whiteSpace = "pre-wrap";
+            responseText.textContent = data.text;
+
+            logBox.appendChild(title);
+            logBox.appendChild(document.createElement("br"));
+            logBox.appendChild(responseText);
+
+            updateStatus(
+                "Success! Verity's response was sent to Google Chat.",
+                "green"
+            );
+
+            document.getElementById("messageInput").value = "";
+
+        } catch (error) {
+            updateStatus(
+                `Error occurred: ${error.message}`,
+                "red"
+            );
+        } finally {
+            sendBtn.disabled = false;
+        }
+    }
+
+    function updateStatus(text, color) {
+        const statusDiv =
+            document.getElementById("status");
+
+        statusDiv.innerText = text;
+        statusDiv.style.color = color;
+    }
+</script>
+
+</body>
+</html>
