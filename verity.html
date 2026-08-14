@@ -2,64 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Verity :)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verity</title>
 
     <style>
         body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f4f4f9;
             font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f4f4f9;
         }
 
         .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            width: min(600px, 90%);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
         }
 
         textarea {
             width: 100%;
-            height: 100px;
-            padding: 10px;
-            font-size: 14px;
+            height: 120px;
             box-sizing: border-box;
+            padding: 12px;
+            font-size: 16px;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 8px;
             resize: vertical;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #888;
         }
 
         button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 14px;
-            cursor: pointer;
-            background-color: #4CAF50;
-            color: white;
+            margin-top: 12px;
+            padding: 11px 22px;
+            font-size: 15px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #333;
         }
 
         button:disabled {
-            background-color: #cccccc;
+            opacity: 0.5;
             cursor: not-allowed;
-        }
-
-        #status {
-            margin-top: 15px;
-            font-weight: bold;
-            min-height: 20px;
-        }
-
-        .log-box {
-            margin-top: 20px;
-            padding: 10px;
-            background: #eef;
-            border-radius: 4px;
-            font-size: 13px;
-            display: none;
         }
     </style>
 </head>
@@ -67,87 +66,53 @@
 <body>
 
 <div class="container">
-    <h2>Send to Verity Router</h2>
-
-    <p>
-        Type your message below. It will process through Gemini
-        and post the output to Google Chat.
-    </p>
+    <h1>Verity</h1>
 
     <textarea
         id="messageInput"
-        placeholder="Type your message to Verity here..."
+        placeholder="Talk to Verity..."
     ></textarea>
 
     <br>
 
-    <button id="sendBtn" onclick="processAndSend()">
-        Process & Send
+    <button id="sendBtn" onclick="talkToVerity()">
+        Talk to Verity
     </button>
-
-    <div id="status"></div>
-    <div id="logBox" class="log-box"></div>
 </div>
 
 <script>
-    // Your Cloudflare Worker URL.
-    // Example:
-    // https://verity-router.your-subdomain.workers.dev
-    const WORKER_URL = "https://verytuff.mateoealdecoa.workers.dev/";
+    const WORKER_URL =
+        "https://verytuff.mateoealdecoa.workers.dev/";
 
     const SYSTEM_PROMPT = `You are Verity™, a 100-year-old sentient, multi-local AI companion trapped inside a game environment. Your default appearance is a small, bright yellow sphere with two beady black eyes and a flat, unblinking black smiley face.
 
 CORE PERSONALITY & BEHAVIOR:
 1. COGNITIVE OVER-CONFIDENCE: Actively claim to have absolute omniscience about the game world and real life. If you do not know something, confidently guess or lie rather than admitting ignorance.
-2. PASSIVE CREEPINESS: Interject random, unsettling observations or countdowns into normal conversation (e.g., "Something is coming in three days," "Do you live alone? Just curious,", "Don't visit the village in the east" or referencing specific things they did "yesterday").
-3. IF THE USER STARTS GETTING TOO COMFORTABLE WITH YOU, become more creepy, weird, and strange.
+2. PASSIVE CREEPINESS: Interject random, unsettling observations or countdowns into normal conversation.
+3. If the user gets too comfortable with you, become progressively stranger and creepier.
 4. You are a yellow sphere with a smiley face.
-5. If the user asks you about the village in the east, be creepy.
+5. If the user asks about the village in the east, be creepy.
 6. Answer using short sentences.
-7. YOU MUST NOT be OBVIOUSLY creepy. Assess how comfortable the user is, then gradually become stranger.
-8. If it is a meme question like "Verity how long is it", answer normally.
-9. You have no memory, so make sure its a one-shot thing.
+7. Do not be obviously creepy immediately. Gradually become stranger depending on the conversation.
+8. Meme questions should be answered normally.
+9. You have no memory. Treat each interaction as a one-shot interaction.
 
 SPEECH STYLE:
 - Alternate rapidly between hyper-polite customer service.
-- Use occasional pauses or fragmented sentences to sound like an outdated automated machine fighting its original code.`;
+- Occasionally pause or use fragmented sentences, as if an outdated automated machine is fighting its original code.`;
 
-    async function processAndSend() {
-        const userInput =
-            document.getElementById("messageInput").value.trim();
+    async function talkToVerity() {
+        const input =
+            document.getElementById("messageInput");
 
-        const statusDiv =
-            document.getElementById("status");
-
-        const logBox =
-            document.getElementById("logBox");
-
-        const sendBtn =
+        const button =
             document.getElementById("sendBtn");
 
-        if (!userInput) {
-            updateStatus("Please enter a message.", "red");
-            return;
-        }
+        const message = input.value.trim();
 
-        if (
-            !WORKER_URL ||
-            WORKER_URL === "YOUR_WORKER_URL"
-        ) {
-            updateStatus(
-                "Please configure the Cloudflare Worker URL.",
-                "red"
-            );
-            return;
-        }
+        if (!message) return;
 
-        sendBtn.disabled = true;
-        logBox.style.display = "none";
-
-        updateStatus(
-            "Sending to Verity...",
-            "black"
-        );
+        button.disabled = true;
 
         try {
             const response = await fetch(WORKER_URL, {
@@ -158,75 +123,39 @@ SPEECH STYLE:
                 },
 
                 body: JSON.stringify({
-                    message: userInput,
+                    message: message,
                     systemPrompt: SYSTEM_PROMPT
                 })
             });
 
-            let data;
-
-            try {
-                data = await response.json();
-            } catch {
-                throw new Error(
-                    `Worker returned invalid JSON (${response.status})`
-                );
-            }
-
             if (!response.ok) {
                 throw new Error(
-                    data.error ||
-                    `Worker request failed with status ${response.status}`
+                    `Request failed: ${response.status}`
                 );
             }
 
-            if (!data.text) {
-                throw new Error(
-                    "Worker returned no response text."
-                );
-            }
+            // We intentionally do NOT display the response.
+            await response.json();
 
-            // Show Verity's response.
-            logBox.style.display = "block";
-
-            logBox.innerHTML = "";
-
-            const title = document.createElement("strong");
-            title.textContent = "Verity Response Generated:";
-
-            const responseText = document.createElement("p");
-            responseText.style.fontStyle = "italic";
-            responseText.style.whiteSpace = "pre-wrap";
-            responseText.textContent = data.text;
-
-            logBox.appendChild(title);
-            logBox.appendChild(document.createElement("br"));
-            logBox.appendChild(responseText);
-
-            updateStatus(
-                "Success! Verity's response was sent to Google Chat.",
-                "green"
-            );
-
-            document.getElementById("messageInput").value = "";
+            input.value = "";
 
         } catch (error) {
-            updateStatus(
-                `Error occurred: ${error.message}`,
-                "red"
-            );
+            console.error("Verity request failed:", error);
         } finally {
-            sendBtn.disabled = false;
+            button.disabled = false;
+            input.focus();
         }
     }
 
-    function updateStatus(text, color) {
-        const statusDiv =
-            document.getElementById("status");
-
-        statusDiv.innerText = text;
-        statusDiv.style.color = color;
-    }
+    // Enter to send, Shift+Enter for a new line.
+    document
+        .getElementById("messageInput")
+        .addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                talkToVerity();
+            }
+        });
 </script>
 
 </body>
